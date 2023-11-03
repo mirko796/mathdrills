@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import './styles.css';
 
 const App: React.FC = () => {
@@ -8,8 +8,8 @@ const App: React.FC = () => {
   const [cols, setCols] = useState<number>(6); // Default number of columns
   const [fontSize, setFontSize] = useState<number>(28); // Default font size
   const [operator, setOperator] = useState<string>('+'); // Default operator ['+', '-', 'x', '/')
-  const [canvasWidth, setCanvasWidth] = useState<number>(2100 / 2); // Default canvas width
-  const [canvasHeight, setCanvasHeight] = useState<number>(2970 / 2); // Default canvas height
+  const [canvasWidth, _setCanvasWidth] = useState<number>(2100 / 2); // Default canvas width
+  const [canvasHeight, _setCanvasHeight] = useState<number>(2970 / 2); // Default canvas height
   const [canvasVisible, setCanvasVisible] = useState<boolean>(false); 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
