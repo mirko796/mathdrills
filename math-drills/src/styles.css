@@ -45,3 +45,8 @@ input, select {
   padding: 10px;
   margin: 10px;
 }
+
+.langicon {
+  max-width: 32px;
+  max-height: 32px;
+}

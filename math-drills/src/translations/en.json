@@ -1,0 +1,14 @@
+{
+    "TITLE": "Math Drills",
+    "N1LEN": "Length of first number:",
+    "N2LEN": "Length of second number:",
+    "MAXNUMBER": "Largest number:",
+    "OPERATOR": "Operator:",
+    "ROWS": "Rows:",
+    "COLS": "Columns:",
+    "TEXTSIZE": "Text size:",
+    "SINGLELINE": "Single line:",
+    "BTN_GENERATE": "Generate",
+    "BTN_PRINT": "Print",
+    "BTN_DOWNLOAD": "Download"
+  }

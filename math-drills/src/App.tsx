@@ -1,7 +1,16 @@
 import React, { useState, useRef } from 'react';
 import './styles.css';
+import { IntlProvider } from 'react-intl';
+import messages_en from './translations/en.json';
+import messages_srlat from './translations/sr_lat.json';
+import { FormattedMessage } from 'react-intl';
 
+const messages: any = {
+  'en': messages_en,
+  'sr': messages_srlat,
+};
 const App: React.FC = () => {
+  const [language, setLanguage] = useState<string>('en');
   const [n, setN] = useState<number>(3); // Default number of circles
   const [m, setM] = useState<number>(1); // Default number of squares
   const [rows, setRows] = useState<number>(10); // Default number of rows
@@ -10,12 +19,12 @@ const App: React.FC = () => {
   const [operator, setOperator] = useState<string>('+'); // Default operator ['+', '-', 'x', '/')
   const [canvasWidth, _setCanvasWidth] = useState<number>(2100 / 2); // Default canvas width
   const [canvasHeight, _setCanvasHeight] = useState<number>(2970 / 2); // Default canvas height
-  const [canvasVisible, setCanvasVisible] = useState<boolean>(false); 
+  const [canvasVisible, setCanvasVisible] = useState<boolean>(false);
   const [singleLine, setSingleLine] = useState<boolean>(false);
   const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 or 1
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  function renderMultilineText(context: CanvasRenderingContext2D, text: string, x: number, y: number, lineSpacing: number = 1.5, singleLine: boolean=false, dryRun: boolean = false) {
+  function renderMultilineText(context: CanvasRenderingContext2D, text: string, x: number, y: number, lineSpacing: number = 1.5, singleLine: boolean = false, dryRun: boolean = false) {
     // Split the text into lines
     const lines = text.split('\n');
     // get the longest line length
@@ -53,7 +62,7 @@ const App: React.FC = () => {
     const bStr = b.toString();
     let text = '';
     if (singleLine) {
-      text=`${aStr} ${operator} ${bStr} = `;
+      text = `${aStr} ${operator} ${bStr} = `;
     } else {
       // pad both aStr and bStr to same length
       const maxLen = Math.max(aStr.length, bStr.length) + 2;
@@ -61,7 +70,7 @@ const App: React.FC = () => {
       let bStrPadded = bStr.padStart(maxLen, ' ');
       // replace first char in bStrPadded with operator
       bStrPadded = bStrPadded.replace(bStrPadded[0], operator);
-      text = `${aStrPadded}\n${bStrPadded}`;      
+      text = `${aStrPadded}\n${bStrPadded}`;
     }
     return text;
   }
@@ -77,8 +86,8 @@ const App: React.FC = () => {
     const max1 = Math.pow(10, digits1) - 1;
     const min2 = Math.pow(10, digits2 - 1);
     const max2 = Math.pow(10, digits2) - 1;
-    let a,b;
-    while(true) {
+    let a, b;
+    while (true) {
       a = Math.floor(Math.random() * (max1 - min1 + 1)) + min1;
       b = Math.floor(Math.random() * (max2 - min2 + 1)) + min2;
       if (operator == '-') {
@@ -86,7 +95,7 @@ const App: React.FC = () => {
           continue;
         }
       }
-      if (digits1 < 3 && digits2 < 3 && Math.max(digits1,digits2)==2) {
+      if (digits1 < 3 && digits2 < 3 && Math.max(digits1, digits2) == 2) {
         if (a >= maxNumber || b >= maxNumber) {
           continue;
         }
@@ -96,7 +105,7 @@ const App: React.FC = () => {
     return [a, b];
   }
   const handleGenerate = () => {
-    setCanvasVisible(true); 
+    setCanvasVisible(true);
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
@@ -136,16 +145,16 @@ const App: React.FC = () => {
             // center in current cell
             let x = col * cellWidth;
             if (!singleLine) {
-              x+= (cellWidth - textWidth) / 2;
+              x += (cellWidth - textWidth) / 2;
             } else {
-              x+= marginTopAndBottom * canvasWidth;
+              x += marginTopAndBottom * canvasWidth;
             }
             let y = row * cellHeight;
             if (singleLine) {
-              y+= (cellHeight - textHeight) / 2;
+              y += (cellHeight - textHeight) / 2;
             } else {
-              y+= marginTopAndBottom * canvasHeight;
-            }   
+              y += marginTopAndBottom * canvasHeight;
+            }
             renderMultilineText(ctx, text, x, y, 1.5, singleLine);
           }
         }
@@ -199,68 +208,86 @@ const App: React.FC = () => {
 
 
   return (
-    <div style={{display:'flex',flexDirection:'column'}}>
-      <div className='container'>
-        <h1>Math Drills</h1>
-        <div className='horizontalflex'>
-          <div className='verticalflex'>
-            <label>
-              Length of first number:
-              <input type="number" value={n} onChange={e => setN(parseInt(e.target.value, 10))} />
-            </label>
-            <label>
-              Length of second number:
-              <input type="number" value={m} onChange={e => setM(parseInt(e.target.value, 10))} />
-            </label>
-            {/* if m and n are both 2 show control for maxNumber */}
-            {(m < 3 && n < 3 && Math.max(m,n)==2) && <label>
-              Max number:
-              <input type="number" value={maxNumber} onChange={e => setMaxNumber(parseInt(e.target.value, 10))} />
-            </label>}
-            <label>
-              Operator:
-              {/* create select box with + - * / options */}
-              <select value={operator} onChange={e => setOperator(e.target.value)}>
-                <option value="+">+</option>
-                <option value="-">-</option>
-                <option value="*">*</option>
-                <option value="/">/</option>
-              </select>
-            </label>
+    <IntlProvider locale={language} messages={messages[language]}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className='container'>
+          <div className='horizontalflex'>
+            <div className='horizontalflex' style={{flexGrow:1}}></div>
+            <h1><FormattedMessage id="TITLE" /></h1>
+            <div className='horizontalflex' style={{flexGrow:1}}></div>
+            <button onClick={() => setLanguage('sr')} title="Srpski">
+              <img src="./serbia.png" alt="Srpski" className='langicon' />
+            </button>
+            <button onClick={() => setLanguage('en')} title="English">
+              <img src="./united-kingdom.png" alt="English" className='langicon' />
+            </button>
           </div>
-          <div className="verticalflex">
-            <label>
-              Rows:
-              <input type="number" value={rows} onChange={e => setRows(parseInt(e.target.value, 10))} />
-            </label>
-            <label>
-              Columns:
-              <input type="number" value={cols} onChange={e => setCols(parseInt(e.target.value, 10))} />
-            </label>            
-            <label>
-              Text size:
-              <input type="number" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value, 10))} />
-            </label>
-            <label>
-              Single line:
-              <input type="checkbox" checked={singleLine} onChange={e => setSingleLine(e.target.checked)} />
+          <div className='horizontalflex'>
+            <div className='verticalflex'>
+              <label>
+                <FormattedMessage id="N1LEN" />
+                <input type="number" value={n} onChange={e => setN(parseInt(e.target.value, 10))} />
               </label>
+              <label>
+                <FormattedMessage id="N2LEN" />
+                <input type="number" value={m} onChange={e => setM(parseInt(e.target.value, 10))} />
+              </label>
+              {/* if m and n are both 2 show control for maxNumber */}
+              {(m < 3 && n < 3 && Math.max(m, n) == 2) && <label>
+                <FormattedMessage id="MAXNUMBER" />
+                <input type="number" value={maxNumber} onChange={e => setMaxNumber(parseInt(e.target.value, 10))} />
+              </label>}
+              <label>
+                <FormattedMessage id="OPERATOR" />
+                {/* create select box with + - * / options */}
+                <select value={operator} onChange={e => setOperator(e.target.value)}>
+                  <option value="+">+</option>
+                  <option value="-">-</option>
+                  <option value="*">*</option>
+                </select>
+              </label>
+            </div>
+            <div className="verticalflex">
+              <label>
+                <FormattedMessage id="ROWS" />
+                <input type="number" value={rows} onChange={e => setRows(parseInt(e.target.value, 10))} />
+              </label>
+              <label>
+                <FormattedMessage id="COLS" />
+                <input type="number" value={cols} onChange={e => setCols(parseInt(e.target.value, 10))} />
+              </label>
+              <label>
+                <FormattedMessage id="TEXTSIZE" />
+                <input type="number" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value, 10))} />
+              </label>
+              <label>
+                <FormattedMessage id="SINGLELINE" />
+
+                <input type="checkbox" checked={singleLine} onChange={e => setSingleLine(e.target.checked)} />
+              </label>
+            </div>
+          </div>
+          <div>
+            <br />
+            <button onClick={handleGenerate}>
+              <FormattedMessage id="BTN_GENERATE" />
+            </button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button onClick={handleDownload} disabled={!canvasVisible}>
+              <FormattedMessage id="BTN_DOWNLOAD" />
+            </button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button onClick={handlePrint} disabled={!canvasVisible}>
+              <FormattedMessage id="BTN_PRINT" />
+            </button>
           </div>
         </div>
-        <div>
-          <br />
-          <button onClick={handleGenerate}>Generate</button> 
-          &nbsp;&nbsp;&nbsp;&nbsp;
-          <button onClick={handleDownload} disabled={!canvasVisible}>Download Image</button> 
-          &nbsp;&nbsp;&nbsp;&nbsp;
-          <button onClick={handlePrint} disabled={!canvasVisible}>Print Image</button>
-        </div>
+        <canvas ref={canvasRef} width={canvasWidth}
+          height={canvasHeight} className="canvas"
+          style={{ display: canvasVisible ? 'block' : 'none' }}
+        />
       </div>
-      <canvas ref={canvasRef} width={canvasWidth} 
-              height={canvasHeight} className="canvas"
-              style={{ display: canvasVisible ? 'block' : 'none' }}
-      />
-    </div>
+    </IntlProvider>
   );
 };
 

@@ -1,0 +1,14 @@
+{
+    "TITLE": "Vežbajmo matematiku",
+    "N1LEN": "Dužina prvog broja:",
+    "N2LEN": "Dužina drugog broja:",
+    "MAXNUMBER": "Najveći broj:",
+    "OPERATOR": "Operacija:",
+    "ROWS": "Redova:",
+    "COLS": "Kolona:",
+    "TEXTSIZE": "Veličina teksta:",
+    "SINGLELINE": "Jedna linija:",
+    "BTN_GENERATE": "Generiši",
+    "BTN_PRINT": "Štampaj",
+    "BTN_DOWNLOAD": "Snimi"
+  }
