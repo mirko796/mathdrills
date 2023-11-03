@@ -11,9 +11,11 @@ const App: React.FC = () => {
   const [canvasWidth, _setCanvasWidth] = useState<number>(2100 / 2); // Default canvas width
   const [canvasHeight, _setCanvasHeight] = useState<number>(2970 / 2); // Default canvas height
   const [canvasVisible, setCanvasVisible] = useState<boolean>(false); 
+  const [singleLine, setSingleLine] = useState<boolean>(false);
+  const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 or 1
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  function renderMultilineText(context: CanvasRenderingContext2D, text: string, x: number, y: number, lineSpacing: number = 1.5, dryRun: boolean = false) {
+  function renderMultilineText(context: CanvasRenderingContext2D, text: string, x: number, y: number, lineSpacing: number = 1.5, singleLine: boolean=false, dryRun: boolean = false) {
     // Split the text into lines
     const lines = text.split('\n');
     // get the longest line length
@@ -32,37 +34,58 @@ const App: React.FC = () => {
       y += lineHeight;
     }
     if (!dryRun) {
-      // draw thick line below
-      const charWidth = context.measureText(' ').width;
-      context.beginPath();
-      context.moveTo(x + charWidth, y);
-      context.lineTo(x + lineLength, y);
-      context.lineWidth = 2;
-      context.stroke();
+      if (!singleLine) {
+        // draw thick line below
+        const charWidth = context.measureText(' ').width;
+        context.beginPath();
+        context.moveTo(x + charWidth, y);
+        context.lineTo(x + lineLength, y);
+        context.lineWidth = 2;
+        context.stroke();
+      }
     }
     return [lineLength, y - startY]
   }
 
-  function generateText(numbers: number[], operator: string) {
+  function generateText(numbers: number[], operator: string, singleLine: boolean) {
     const [a, b] = numbers;
     const aStr = a.toString();
     const bStr = b.toString();
-    // pad both aStr and bStr to same length
-    const maxLen = Math.max(aStr.length, bStr.length) + 2;
-    const aStrPadded = aStr.padStart(maxLen, ' ');
-    let bStrPadded = bStr.padStart(maxLen, ' ');
-    // replace first char in bStrPadded with operator
-    bStrPadded = bStrPadded.replace(bStrPadded[0], operator);
-    const text = `${aStrPadded}\n${bStrPadded}`;
+    let text = '';
+    if (singleLine) {
+      text=`${aStr} ${operator} ${bStr} = `;
+    } else {
+      // pad both aStr and bStr to same length
+      const maxLen = Math.max(aStr.length, bStr.length) + 2;
+      const aStrPadded = aStr.padStart(maxLen, ' ');
+      let bStrPadded = bStr.padStart(maxLen, ' ');
+      // replace first char in bStrPadded with operator
+      bStrPadded = bStrPadded.replace(bStrPadded[0], operator);
+      text = `${aStrPadded}\n${bStrPadded}`;      
+    }
     return text;
   }
-  function getRandomIntegers(digits1: number, digits2: number) {
+  function getRandomIntegers(digits1: number, digits2: number, operator: string = '+') {
     const min1 = Math.pow(10, digits1 - 1);
     const max1 = Math.pow(10, digits1) - 1;
     const min2 = Math.pow(10, digits2 - 1);
     const max2 = Math.pow(10, digits2) - 1;
-    const a = Math.floor(Math.random() * (max1 - min1 + 1)) + min1;
-    const b = Math.floor(Math.random() * (max2 - min2 + 1)) + min2;
+    let a,b;
+    while(true) {
+      a = Math.floor(Math.random() * (max1 - min1 + 1)) + min1;
+      b = Math.floor(Math.random() * (max2 - min2 + 1)) + min2;
+      if (operator == '-') {
+        if (a <= b) {
+          continue;
+        }
+      }
+      if (digits1 < 3 && digits2 < 3 && Math.max(digits1,digits2)==2) {
+        if (a >= maxNumber || b >= maxNumber) {
+          continue;
+        }
+      }
+      break;
+    }
     return [a, b];
   }
   const handleGenerate = () => {
@@ -71,16 +94,22 @@ const App: React.FC = () => {
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        const cellWidth = canvasWidth / cols;
+        let cellWidth, cellHeight;
         const marginTopAndBottom = 0.025
-        const cellHeight = (canvasHeight * (1 - marginTopAndBottom * 2)) / rows;
-        for (let i = 0; i < rows; i++) {
-          for (let j = 0; j < cols; j++) {
-            ctx.beginPath();
-            ctx.rect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
-            ctx.stroke();
-          }
+        if (!singleLine) {
+          cellWidth = canvasWidth / cols;
+          cellHeight = (canvasHeight * (1 - marginTopAndBottom * 2)) / rows;
+        } else {
+          cellWidth = (canvasWidth * (1 - marginTopAndBottom * 2)) / cols;
+          cellHeight = canvasHeight / rows;
         }
+        // for (let i = 0; i < rows; i++) {
+        //   for (let j = 0; j < cols; j++) {
+        //     ctx.beginPath();
+        //     ctx.rect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+        //     ctx.stroke();
+        //   }
+        // }
         // fill whole canvas with white
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -88,20 +117,38 @@ const App: React.FC = () => {
         // Set the font to a monospaced font
         ctx.font = `${fontSize}px monospace`;
         ctx.textBaseline = 'top';
+        ctx.textAlign = 'left';
         ctx.fillStyle = 'black';
-        let numbers = getRandomIntegers(n, m);
-        let text = generateText(numbers, operator);
-        const [textWidth, _textHeight] = renderMultilineText(ctx, text, 10, 10, 1.5, true);
+        let numbers = getRandomIntegers(n, m, operator);
+        let text = generateText(numbers, operator, singleLine);
+        const [textWidth, textHeight] = renderMultilineText(ctx, text, 10, 10, 1.5, singleLine, true);
         for (let col = 0; col < cols; col++) {
           for (let row = 0; row < rows; row++) {
-            numbers = getRandomIntegers(n, m);
-            text = generateText(numbers, operator);
+            numbers = getRandomIntegers(n, m, operator);
+            text = generateText(numbers, operator, singleLine);
             // center in current cell
-            const x = col * cellWidth + (cellWidth - textWidth) / 2;
-            const y = row * cellHeight + marginTopAndBottom * canvasHeight;
-            renderMultilineText(ctx, text, x, y);
+            let x = col * cellWidth;
+            if (!singleLine) {
+              x+= (cellWidth - textWidth) / 2;
+            } else {
+              x+= marginTopAndBottom * canvasWidth;
+            }
+            let y = row * cellHeight;
+            if (singleLine) {
+              y+= (cellHeight - textHeight) / 2;
+            } else {
+              y+= marginTopAndBottom * canvasHeight;
+            }   
+            renderMultilineText(ctx, text, x, y, 1.5, singleLine);
           }
         }
+        const footerText = "Generated by mirko796.github.io/mathdrills";
+        // draw text at bottom of canvas horizontally centered using gray color with some Tahoma italic font
+        ctx.fillStyle = 'gray';
+        ctx.textBaseline = 'bottom';
+        ctx.textAlign = 'center';
+        ctx.font = `italic 14px Tahoma`;
+        ctx.fillText(footerText, canvasWidth / 2, canvasHeight - 10);
 
       }
     }
@@ -158,6 +205,11 @@ const App: React.FC = () => {
               Length of second number:
               <input type="number" value={m} onChange={e => setM(parseInt(e.target.value, 10))} />
             </label>
+            {/* if m and n are both 2 show control for maxNumber */}
+            {(m < 3 && n < 3 && Math.max(m,n)==2) && <label>
+              Max number:
+              <input type="number" value={maxNumber} onChange={e => setMaxNumber(parseInt(e.target.value, 10))} />
+            </label>}
             <label>
               Operator:
               {/* create select box with + - * / options */}
@@ -177,11 +229,15 @@ const App: React.FC = () => {
             <label>
               Columns:
               <input type="number" value={cols} onChange={e => setCols(parseInt(e.target.value, 10))} />
-            </label>
+            </label>            
             <label>
               Text size:
               <input type="number" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value, 10))} />
             </label>
+            <label>
+              Single line:
+              <input type="checkbox" checked={singleLine} onChange={e => setSingleLine(e.target.checked)} />
+              </label>
           </div>
         </div>
         <div>
