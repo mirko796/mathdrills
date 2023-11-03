@@ -66,6 +66,13 @@ const App: React.FC = () => {
     return text;
   }
   function getRandomIntegers(digits1: number, digits2: number, operator: string = '+') {
+    if (operator == '-') {
+      if (digits1 < digits2) {
+        const tmp = digits1;
+        digits1 = digits2;
+        digits2 = tmp;
+      }
+    }
     const min1 = Math.pow(10, digits1 - 1);
     const max1 = Math.pow(10, digits1) - 1;
     const min2 = Math.pow(10, digits2 - 1);
