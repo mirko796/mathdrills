@@ -3,7 +3,7 @@ body {
   text-align: center;
   padding: 20px;
   /* add faded background from bg.png */
-  background-image: url("bg.png");
+  background-image: url("/bg.png");
   
 }
 
