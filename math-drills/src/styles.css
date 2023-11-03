@@ -1,0 +1,47 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+  /* add faded background from bg.png */
+  background-image: url("bg.png");
+  
+}
+
+label {
+  margin-right: 10px;
+}
+
+input, select {
+  margin-right: 20px;
+  margin-left: 5px;
+  max-width: 50px;
+}
+
+.canvas {
+  border: 1px solid #000;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  /* make canvas translucent */
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.verticalflex {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+  align-items: start;
+}
+.horizontalflex {
+  display: flex;
+  flex-direction: row;
+  row-gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.container {
+  /* rounded corners with translucent blue background */
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+}
