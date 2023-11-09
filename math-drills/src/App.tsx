@@ -24,6 +24,13 @@ const App: React.FC = () => {
   const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 or 1
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  useEffect(() => {
+    const img = document.createElement("img");
+    const tsInSeconds = Math.floor(Date.now() / 1000);
+    img.src = "https://mrcode.dev/md-pix.png?q=" + tsInSeconds;
+    img.style.display = "none";
+    document.body.appendChild(img);
+  },[]);
   // useeffect to to call generateText when any of states change
   useEffect(() => {
     handleGenerate();
