@@ -2,16 +2,19 @@ body {
   font-family: sans-serif;
   text-align: center;
   padding: 20px;
+  padding-top: 2px;
   /* add faded background from bg.png */
-  background-image: url("/bg.png");
-  
+  background-image: url("/bg.webp");
+  /* background should fit the width and height */
+  background-size: cover;
 }
 
 label {
   margin-right: 10px;
 }
 
-input, select {
+input,
+select {
   margin-right: 20px;
   margin-left: 5px;
   max-width: 50px;
@@ -21,8 +24,11 @@ input, select {
   border: 1px solid #000;
   margin-top: 10px;
   margin-bottom: 10px;
-  /* make canvas translucent */
-  background-color: rgba(255, 255, 255, 0.7);
+  opacity: 0.85;
+  /* rounded corners */
+  border-radius: 20px;
+  /* drop shadow */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .verticalflex {
@@ -31,6 +37,7 @@ input, select {
   row-gap: 10px;
   align-items: start;
 }
+
 .horizontalflex {
   display: flex;
   flex-direction: row;
@@ -38,15 +45,62 @@ input, select {
   align-items: center;
   justify-content: center;
 }
+
 .container {
   /* rounded corners with translucent blue background */
   background-color: rgba(255, 255, 255, 0.85);
   border-radius: 10px;
   padding: 10px;
-  margin: 10px;
+  margin-top: 5px;
+  /* add drop shadow */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.authorContainer {
+  /* rounded corners with translucent blue background */
+  background-color: rgba(255, 255, 255, 0.55);
+  border-radius: 10px;
+  padding: 3px;
+  margin: 0px;
+  margin-right: 10px;
+  /* add drop shadow */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .langicon {
-  max-width: 32px;
-  max-height: 32px;
+  max-width: 24px;
+  max-height: 24px;
+  /* rounded corners */
+  border-radius: 10px;
+}
+
+.custombtn {
+  margin: 1px;
+  /* no padding */
+  padding: 4;
+  /* no border */
+  border: none;
+  /* no background */
+  background: none;
+  background-color: rgba(0, 0, 0, 0.10);
+  border-radius: 5px;
+}
+/* on hover for langiconbtn show some background */
+.custombtn:hover {
+  background-color: rgba(0, 0, 100, 0.25);
+  border-radius: 5px;
+}
+
+/* if width is smaller than 500 set padding to 10px */
+@media (max-width: 500px) {
+  body {
+    padding: 5px;
+    padding-top: 2px;
+  }
+  .langicon {
+    max-width: 16px;
+    max-height: 16px;
+    /* rounded corners */
+    border-radius: 5px;
+  }
 }

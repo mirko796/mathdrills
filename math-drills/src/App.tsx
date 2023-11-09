@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './styles.css';
 import { IntlProvider } from 'react-intl';
 import messages_en from './translations/en.json';
@@ -24,6 +24,11 @@ const App: React.FC = () => {
   const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 or 1
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // useeffect to to call generateText when any of states change
+  useEffect(() => {
+    handleGenerate();
+  },
+    [n, m, rows, cols, fontSize, operator, singleLine, maxNumber]);
   function renderMultilineText(context: CanvasRenderingContext2D, text: string, x: number, y: number, lineSpacing: number = 1.5, singleLine: boolean = false, dryRun: boolean = false) {
     // Split the text into lines
     const lines = text.split('\n');
@@ -209,16 +214,31 @@ const App: React.FC = () => {
 
   return (
     <IntlProvider locale={language} messages={messages[language]}>
+        <div className='horizontalflex'>
+          <div className='horizontalflex' style={{flexGrow:1}}></div>
+          <div className='horizontalflex authorContainer' style={{flexGrow:0}}>
+            &nbsp;
+            <a href="https://mrcode.dev/" target="_blank" rel="noopener noreferrer">
+              <img src="./author.png" alt="Author" className='langicon' />
+            </a>
+            &nbsp;&nbsp;
+            <a href="https://github.com/mirko796/mathdrills" target="_blank" rel="noopener noreferrer">
+              <img src="./github.png" alt="Github" className='langicon' />
+            </a>
+            &nbsp;
+          </div>
+        </div>
+
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <div className='container'>
           <div className='horizontalflex'>
             <div className='horizontalflex' style={{flexGrow:1}}></div>
             <h1><FormattedMessage id="TITLE" /></h1>
             <div className='horizontalflex' style={{flexGrow:1}}></div>
-            <button onClick={() => setLanguage('sr')} title="Srpski">
+            <button onClick={() => setLanguage('sr')} title="Srpski" className='custombtn'>
               <img src="./serbia.png" alt="Srpski" className='langicon' />
             </button>
-            <button onClick={() => setLanguage('en')} title="English">
+            <button onClick={() => setLanguage('en')} title="English"  className='custombtn'>
               <img src="./united-kingdom.png" alt="English" className='langicon' />
             </button>
           </div>
