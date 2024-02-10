@@ -41,8 +41,9 @@ const App: React.FC = () => {
     } catch (e) {
       return;
     }
-    if (!settings) return;
-    setLoading(true);
+    if (!settings) {
+      return;
+    } 
     if (settings.n) setN(settings.n);
     if (settings.m) setM(settings.m);
     if (settings.rows) setRows(settings.rows);
@@ -53,8 +54,6 @@ const App: React.FC = () => {
     if (settings.underline) setUnderline(settings.underline);
     if (settings.maxNumber) setMaxNumber(settings.maxNumber);
     if (settings.language) setLanguage(settings.language);
-    console.log("Settings loaded underlng", settings.underline);   
-    setLoading(false);
   }
   useEffect(() => {
     const img = document.createElement("img");
@@ -63,8 +62,9 @@ const App: React.FC = () => {
     img.style.display = "none";
     document.body.appendChild(img);
     const settings = localStorage.getItem('settings') || '';
-    console.log("Settings loaded", settings);
+    setLoading(true);
     settingsFromJson(settings);
+    setLoading(false);
   },[]);
   // useeffect to to call generateText when any of states change
   useEffect(() => {
