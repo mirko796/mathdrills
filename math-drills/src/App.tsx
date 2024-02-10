@@ -4,6 +4,7 @@ import { IntlProvider } from 'react-intl';
 import messages_en from './translations/en.json';
 import messages_srlat from './translations/sr_lat.json';
 import { FormattedMessage } from 'react-intl';
+import { VERSION } from './version';
 
 const messages: any = {
   'en': messages_en,
@@ -21,21 +22,59 @@ const App: React.FC = () => {
   const [canvasHeight, _setCanvasHeight] = useState<number>(2970 / 2); // Default canvas height
   const [canvasVisible, setCanvasVisible] = useState<boolean>(false);
   const [singleLine, setSingleLine] = useState<boolean>(false);
+  const [underline, setUnderline] = useState<boolean>(false);
   const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 or 1
+  const [isLoading, setLoading] = useState<boolean>(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  /* save settings to local storage */
+  const settingsToJson = () => {
+    const ret = JSON.stringify({
+      n, m, rows, cols, fontSize, operator, singleLine, underline, maxNumber, language
+    });
+    return ret;
+  }
+  const settingsFromJson = (json: string) => {
+    let settings = null;
+    try {
+      settings = JSON.parse(json);
+    } catch (e) {
+      return;
+    }
+    if (!settings) return;
+    setLoading(true);
+    if (settings.n) setN(settings.n);
+    if (settings.m) setM(settings.m);
+    if (settings.rows) setRows(settings.rows);
+    if (settings.cols) setCols(settings.cols);
+    if (settings.fontSize) setFontSize(settings.fontSize);
+    if (settings.operator) setOperator(settings.operator);
+    if (settings.singleLine) setSingleLine(settings.singleLine);
+    if (settings.underline) setUnderline(settings.underline);
+    if (settings.maxNumber) setMaxNumber(settings.maxNumber);
+    if (settings.language) setLanguage(settings.language);
+    console.log("Settings loaded underlng", settings.underline);   
+    setLoading(false);
+  }
   useEffect(() => {
     const img = document.createElement("img");
     const tsInSeconds = Math.floor(Date.now() / 1000);
     img.src = "https://mrcode.dev/md-pix.png?q=" + tsInSeconds;
     img.style.display = "none";
     document.body.appendChild(img);
+    const settings = localStorage.getItem('settings') || '';
+    console.log("Settings loaded", settings);
+    settingsFromJson(settings);
   },[]);
   // useeffect to to call generateText when any of states change
   useEffect(() => {
+    if (isLoading) return;
     handleGenerate();
+    const settings = settingsToJson();
+    console.log("Settings saved", settings);
+    localStorage.setItem('settings', settings);
   },
-    [n, m, rows, cols, fontSize, operator, singleLine, maxNumber]);
+    [n, m, rows, cols, fontSize, operator, singleLine, underline, maxNumber, isLoading, language]);
   function renderMultilineText(context: CanvasRenderingContext2D, text: string, x: number, y: number, lineSpacing: number = 1.5, singleLine: boolean = false, dryRun: boolean = false) {
     // Split the text into lines
     const lines = text.split('\n');
@@ -62,6 +101,14 @@ const App: React.FC = () => {
         context.moveTo(x + charWidth, y);
         context.lineTo(x + lineLength, y);
         context.lineWidth = 2;
+        context.stroke();
+      } else if (underline) {
+        // draw thin line below
+        const charWidth = context.measureText(' = ').width;
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(x + lineLength-charWidth, y);
+        context.lineWidth = 1;
         context.stroke();
       }
     }
@@ -131,13 +178,6 @@ const App: React.FC = () => {
           cellWidth = (canvasWidth * (1 - marginTopAndBottom * 2)) / cols;
           cellHeight = canvasHeight / rows;
         }
-        // for (let i = 0; i < rows; i++) {
-        //   for (let j = 0; j < cols; j++) {
-        //     ctx.beginPath();
-        //     ctx.rect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
-        //     ctx.stroke();
-        //   }
-        // }
         // fill whole canvas with white
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -163,7 +203,13 @@ const App: React.FC = () => {
             }
             let y = row * cellHeight;
             if (singleLine) {
-              y += (cellHeight - textHeight) / 2;
+              if (underline) {
+                // if underline is enabled, move text up a bit
+                // so students can write below the line
+                y += (cellHeight - textHeight) / 8;
+              } else {
+                y += (cellHeight - textHeight) / 2;
+              }
             } else {
               y += marginTopAndBottom * canvasHeight;
             }
@@ -177,7 +223,10 @@ const App: React.FC = () => {
         ctx.textAlign = 'center';
         ctx.font = `italic 14px Tahoma`;
         ctx.fillText(footerText, canvasWidth / 2, canvasHeight - 10);
-
+        const versionText = `v${VERSION}`;
+        // draw version at the bottom right corner
+        const versionWidth = ctx.measureText(versionText).width;
+        ctx.fillText(versionText, canvasWidth - versionWidth - 10, canvasHeight - 10);
       }
     }
   };
@@ -273,7 +322,10 @@ const App: React.FC = () => {
                   <option value="*">*</option>
                 </select>
               </label>
-            </div>
+              <label>
+                <FormattedMessage id="SINGLELINE" />
+                <input type="checkbox" checked={singleLine} onChange={e => setSingleLine(e.target.checked)} />
+              </label>            </div>
             <div className="verticalflex">
               <label>
                 <FormattedMessage id="ROWS" />
@@ -287,10 +339,9 @@ const App: React.FC = () => {
                 <FormattedMessage id="TEXTSIZE" />
                 <input type="number" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value, 10))} />
               </label>
-              <label>
-                <FormattedMessage id="SINGLELINE" />
-
-                <input type="checkbox" checked={singleLine} onChange={e => setSingleLine(e.target.checked)} />
+              <label style={{ color: singleLine ? 'black' : 'gray' }}>
+                <FormattedMessage id="UNDERLINE"/>
+                <input disabled={!singleLine} type="checkbox" checked={underline} onChange={e => setUnderline(e.target.checked)} />
               </label>
             </div>
           </div>
