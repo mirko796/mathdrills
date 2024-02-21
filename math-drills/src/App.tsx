@@ -153,7 +153,7 @@ const App: React.FC = () => {
     const max1 = Math.pow(10, digits1) - 1;
     const min2 = Math.pow(10, digits2 - 1);
     const max2 = Math.pow(10, digits2) - 1;
-    let a, b;
+    let a=0, b=0;
     // repeat 1000 times, if fails to find satisfying a and b, return what we have
     // this is important for division where we try to enforce that a is divisible by b
     // and that ideally a!=b
