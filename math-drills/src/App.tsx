@@ -23,10 +23,17 @@ const App: React.FC = () => {
   const [canvasVisible, setCanvasVisible] = useState<boolean>(false);
   const [singleLine, setSingleLine] = useState<boolean>(false);
   const [underline, setUnderline] = useState<boolean>(false);
-  const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 or 1
+  const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 
   const [isLoading, setLoading] = useState<boolean>(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
+  const firstMustBeLargerOps = ['-', ':', '/'];
+  const divisionOps = [':', '/'];
+  const updateMaxNumber = (newValue: number) => {
+    console.log("updateMaxNumber", newValue);
+    if (newValue >= 20 && newValue <= 99) {
+      setMaxNumber(newValue);
+    } 
+  };
   /* save settings to local storage */
   const settingsToJson = () => {
     const ret = JSON.stringify({
@@ -52,7 +59,7 @@ const App: React.FC = () => {
     if (settings.operator) setOperator(settings.operator);
     if (settings.singleLine) setSingleLine(settings.singleLine);
     if (settings.underline) setUnderline(settings.underline);
-    if (settings.maxNumber) setMaxNumber(settings.maxNumber);
+    if (settings.maxNumber) updateMaxNumber(settings.maxNumber);
     if (settings.language) setLanguage(settings.language);
   }
   useEffect(() => {
@@ -134,28 +141,45 @@ const App: React.FC = () => {
     return text;
   }
   function getRandomIntegers(digits1: number, digits2: number, operator: string = '+') {
-    if (operator == '-') {
+    if (firstMustBeLargerOps.includes(operator)) {
       if (digits1 < digits2) {
         const tmp = digits1;
         digits1 = digits2;
         digits2 = tmp;
       }
     }
+    const maxNumberInternal = divisionOps.includes(operator) ? 99 : maxNumber;
     const min1 = Math.pow(10, digits1 - 1);
     const max1 = Math.pow(10, digits1) - 1;
     const min2 = Math.pow(10, digits2 - 1);
     const max2 = Math.pow(10, digits2) - 1;
     let a, b;
-    while (true) {
+    // repeat 1000 times, if fails to find satisfying a and b, return what we have
+    // this is important for division where we try to enforce that a is divisible by b
+    // and that ideally a!=b
+    for (let i = 0; i < 1000; i++) {
       a = Math.floor(Math.random() * (max1 - min1 + 1)) + min1;
       b = Math.floor(Math.random() * (max2 - min2 + 1)) + min2;
-      if (operator == '-') {
+      if (operator == '-' || divisionOps.includes(operator)) {
         if (a <= b) {
+          const tmp = a;
+          a = b;
+          b = tmp;
+        }
+      } 
+      if (divisionOps.includes(operator)) {
+        if (b < 2) {
           continue;
         }
+        const c = Math.floor(a / b);
+        if (c < 2) {
+          continue;
+        }
+        a = c * b;
       }
-      if (digits1 < 3 && digits2 < 3 && Math.max(digits1, digits2) == 2) {
-        if (a >= maxNumber || b >= maxNumber) {
+
+      if ( (digits1==2) && (digits2==2) ) {
+        if (a >= maxNumberInternal || b >= maxNumberInternal) {
           continue;
         }
       }
@@ -309,9 +333,9 @@ const App: React.FC = () => {
                 <input type="number" value={m} onChange={e => setM(parseInt(e.target.value, 10))} />
               </label>
               {/* if m and n are both 2 show control for maxNumber */}
-              {(m < 3 && n < 3 && Math.max(m, n) == 2) && <label>
+              {(m == 2 && n == 2 && !divisionOps.includes(operator)) && <label>
                 <FormattedMessage id="MAXNUMBER" />
-                <input type="number" value={maxNumber} onChange={e => setMaxNumber(parseInt(e.target.value, 10))} />
+                <input type="number" value={maxNumber} min={20} max={99} onChange={e => updateMaxNumber(parseInt(e.target.value, 10))} />
               </label>}
               <label>
                 <FormattedMessage id="OPERATOR" />
@@ -320,6 +344,8 @@ const App: React.FC = () => {
                   <option value="+">+</option>
                   <option value="-">-</option>
                   <option value="*">*</option>
+                  <option value=":">:</option>
+                  <option value="/">/</option>
                 </select>
               </label>
               <label>

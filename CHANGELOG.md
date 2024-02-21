@@ -1,3 +1,5 @@
+# 1.0.3 2024-02-21
+- added division
 # 1.0.2 2024-02-10
 - fixed problem with loading settings from local storage
 # 1.0.1 2024-02-10
