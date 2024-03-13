@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [underline, setUnderline] = useState<boolean>(false);
   const [maxNumber, setMaxNumber] = useState<number>(20); // Used only when n and m are 2 
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [divisionWithoutRemainder, setDivisionWithoutRemainder] = useState<boolean>(false); // Default division with remainder [true, false
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const firstMustBeLargerOps = ['-', ':', '/'];
   const divisionOps = [':', '/'];
@@ -37,7 +38,7 @@ const App: React.FC = () => {
   /* save settings to local storage */
   const settingsToJson = () => {
     const ret = JSON.stringify({
-      n, m, rows, cols, fontSize, operator, singleLine, underline, maxNumber, language
+      n, m, rows, cols, fontSize, operator, singleLine, underline, maxNumber, language, divisionWithoutRemainder
     });
     return ret;
   }
@@ -61,6 +62,7 @@ const App: React.FC = () => {
     if (settings.underline) setUnderline(settings.underline);
     if (settings.maxNumber) updateMaxNumber(settings.maxNumber);
     if (settings.language) setLanguage(settings.language);
+    if (settings.divisionWithoutRemainder) setDivisionWithoutRemainder(settings.divisionWithoutRemainder);
   }
   useEffect(() => {
     const img = document.createElement("img");
@@ -81,7 +83,8 @@ const App: React.FC = () => {
     console.log("Settings saved", settings);
     localStorage.setItem('settings', settings);
   },
-    [n, m, rows, cols, fontSize, operator, singleLine, underline, maxNumber, isLoading, language]);
+    [n, m, rows, cols, fontSize, operator, singleLine, underline, 
+      maxNumber, isLoading, language, divisionWithoutRemainder]);
   function renderMultilineText(context: CanvasRenderingContext2D, text: string, x: number, y: number, lineSpacing: number = 1.5, singleLine: boolean = false, dryRun: boolean = false) {
     // Split the text into lines
     const lines = text.split('\n');
@@ -175,7 +178,9 @@ const App: React.FC = () => {
         if (c < 2) {
           continue;
         }
-        a = c * b;
+        if (divisionWithoutRemainder) {
+          a = c * b;
+        }
       }
 
       if ( (digits1==2) && (digits2==2) ) {
@@ -340,7 +345,7 @@ const App: React.FC = () => {
               <label>
                 <FormattedMessage id="OPERATOR" />
                 {/* create select box with + - * / options */}
-                <select value={operator} onChange={e => setOperator(e.target.value)}>
+                <select style={{marginRight: 5}} value={operator} onChange={e => setOperator(e.target.value)}>
                   <option value="+">+</option>
                   <option value="-">-</option>
                   <option value="*">*</option>
@@ -348,6 +353,12 @@ const App: React.FC = () => {
                   <option value="/">/</option>
                 </select>
               </label>
+              {(divisionOps.includes(operator)) &&
+                <label style={{paddingLeft: 16}}>
+                    <FormattedMessage id="WITHOUT_REMAINDER" />
+                    <input type="checkbox" style={{marginRight: 5}} checked={divisionWithoutRemainder} onChange={e => setDivisionWithoutRemainder(e.target.checked)} />
+                </label>
+                }                
               <label>
                 <FormattedMessage id="SINGLELINE" />
                 <input type="checkbox" checked={singleLine} onChange={e => setSingleLine(e.target.checked)} />

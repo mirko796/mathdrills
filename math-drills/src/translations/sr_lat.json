@@ -11,5 +11,6 @@
     "BTN_GENERATE": "Osveži",
     "BTN_PRINT": "Štampaj",
     "BTN_DOWNLOAD": "Snimi",
-    "UNDERLINE": "Podvučeno:"
+    "UNDERLINE": "Podvučeno:",
+    "WITHOUT_REMAINDER": "Bez ostatka:"
   }
